@@ -32,11 +32,12 @@ if video_file is not None:
         )
 
         def generate_feedback(text, disc_type):
+            # Correction de la syntaxe de la chaîne formatée
             prompt = f"""
             Tu es un coach virtuel DISC.
             Le profil de la personne est : {disc_type}.
             Voici son pitch transcrit :
-            """{text}"""
+            {text}
 
             Donne un retour constructif, empathique, adapté au style {disc_type} avec des conseils concrets.
             """
@@ -54,15 +55,18 @@ if video_file is not None:
             st.info(feedback)
 
         try:
+            # Suppression de l'ancienne vidéo sur Supabase
             supabase.storage.from_(BUCKET_NAME).remove([video_file.name])
         except Exception:
             pass
 
+        # Téléversement de la vidéo sur Supabase
         supabase.storage.from_(BUCKET_NAME).upload(video_file.name, temp_file_path)
         video_url = supabase.storage.from_(BUCKET_NAME).get_public_url(video_file.name)
 
         user_name = st.text_input("Ton prénom / pseudo")
         if st.button("Enregistrer le pitch") and user_name:
+            # Enregistrement des données dans Supabase
             data = {
                 "user_name": user_name,
                 "video_url": video_url,
